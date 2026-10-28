@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediLogic AI | CSP & Forward Chaining Disease Prediction Support System</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(224, 242, 254, 0.8);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-sky-100 selection:text-sky-900 flex flex-col min-h-screen">
+
+  <!-- FLOATING TOAST -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-2.5 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none text-xs sm:text-sm font-medium">
+    <i data-lucide="sparkles" class="w-4 h-4 text-cyan-400"></i>
+    <span id="toast-text">Notification</span>
+  </div>
+
+  <!-- NAVIGATION HEADER -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-sky-100 shadow-xs">
+    <!-- Academic Advisory Banner -->
+    <div class="bg-gradient-to-r from-blue-700 via-sky-600 to-cyan-600 text-white text-[11px] font-medium py-1 px-4 text-center tracking-wide flex items-center justify-center gap-2">
+      <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-cyan-200"></i>
+      <span>FAI Micro-Project Submission (2ADPC204) &bull; Academic AI Demonstration &bull; Not for Clinical Medical Diagnoses</span>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <!-- Brand Logo -->
+      <div onclick="navigate('home')" class="flex items-center gap-3 cursor-pointer group transition-transform active:scale-95">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-600 via-blue-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-sky-500/25 group-hover:rotate-6 transition-transform">
+          <i data-lucide="brain" class="w-6 h-6 stroke-[2.2]"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-xl font-extrabold tracking-tight text-slate-900">MediLogic</span>
+            <span class="text-xl font-bold bg-gradient-to-r from-sky-600 to-cyan-600 bg-clip-text text-transparent">AI</span>
+            <span class="hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 ml-1">v2.0 FAI</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-medium hidden sm:block">CSP & Forward Chaining Reasoning Support</p>
+        </div>
+      </div>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden xl:flex items-center gap-1" id="desktop-nav">
+        <button onclick="navigate('home')" class="nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center gap-1.5" data-target="home">
+          <i data-lucide="activity" class="w-3.5 h-3.5"></i> Home
+        </button>
+        <button onclick="navigate('symptoms')" class="nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center gap-1.5" data-target="symptoms">
+          <i data-lucide="stethoscope" class="w-3.5 h-3.5"></i> Symptom Checker
+        </button>
+        <button onclick="navigate('csp')" class="nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center gap-1.5" data-target="csp">
+          <i data-lucide="network" class="w-3.5 h-3.5"></i> CSP Engine
+        </button>
+        <button onclick="navigate('fc')" class="nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center gap-1.5" data-target="fc">
+          <i data-lucide="git-branch" class="w-3.5 h-3.5"></i> Forward Chaining
+        </button>
+        <button onclick="navigate('dashboard')" class="nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center gap-1.5" data-target="dashboard">
+          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i> AI Dashboard
+        </button>
+        <button onclick="navigate('rules')" class="nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center gap-1.5" data-target="rules">
+          <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Rule Explorer
+        </button>
+        <button onclick="navigate('tests')" class="nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center gap-1.5" data-target="tests">
+          <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Test Cases
+        </button>
+        <button onclick="navigate('about')" class="nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center gap-1.5" data-target="about">
+          <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i> About Project
+        </button>
+      </nav>
+
+      <!-- Quick Action / Active Count -->
+      <div class="hidden sm:flex items-center gap-3">
+        <button onclick="navigate('symptoms')" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white text-xs font-bold shadow-md shadow-sky-500/20 active:scale-95 transition-all flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>Try Demo</span>
+          <span id="nav-badge-count" class="w-5 h-5 rounded-full bg-white/20 text-[10px] flex items-center justify-center font-bold">2</span>
+        </button>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button onclick="toggleMobileMenu()" class="xl:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100">
+        <i data-lucide="menu" id="mobile-menu-icon" class="w-6 h-6"></i>
+      </button>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-menu" class="hidden xl:hidden bg-white border-b border-sky-100 px-4 pt-2 pb-5 space-y-1 shadow-lg">
+      <button onclick="navigate('home'); toggleMobileMenu();" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50"><i data-lucide="activity" class="w-4 h-4 text-sky-600"></i> Home</button>
+      <button onclick="navigate('symptoms'); toggleMobileMenu();" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50"><i data-lucide="stethoscope" class="w-4 h-4 text-sky-600"></i> Symptom Checker</button>
+      <button onclick="navigate('csp'); toggleMobileMenu();" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50"><i data-lucide="network" class="w-4 h-4 text-purple-600"></i> CSP Engine</button>
+      <button onclick="navigate('fc'); toggleMobileMenu();" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50"><i data-lucide="git-branch" class="w-4 h-4 text-teal-600"></i> Forward Chaining</button>
+      <button onclick="navigate('dashboard'); toggleMobileMenu();" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50"><i data-lucide="layout-dashboard" class="w-4 h-4 text-blue-600"></i> AI Results Dashboard</button>
+      <button onclick="navigate('rules'); toggleMobileMenu();" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50"><i data-lucide="book-open" class="w-4 h-4 text-indigo-600"></i> Rule Explorer</button>
+      <button onclick="navigate('tests'); toggleMobileMenu();" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i> Test Cases</button>
+      <button onclick="navigate('about'); toggleMobileMenu();" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50"><i data-lucide="graduation-cap" class="w-4 h-4 text-slate-600"></i> About Project</button>
+    </div>
+  </header>
+
+  <!-- MAIN APP ROUTING PAGES -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ================================================================== -->
+    <!-- 1. HOME VIEW                                                       -->
+    <!-- ================================================================== -->
+    <section id="view-home" class="page-view space-y-10">
+      <!-- Hero Banner -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-700 via-sky-600 to-cyan-600 p-8 sm:p-12 text-white shadow-xl shadow-blue-500/15">
+        <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="lg:col-span-7 space-y-5">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold text-cyan-100 border border-white/20">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-cyan-200"></i>
+              <span>Understand Symptoms. Explore AI. Make Informed Decisions.</span>
+            </div>
+
+            <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+              Smarter Healthcare <br>
+              <span class="text-cyan-200">with Logical AI</span>
+            </h1>
+
+            <p class="text-sm sm:text-base text-sky-50 font-normal leading-relaxed max-w-2xl">
+              MediLogic AI demonstrates how Artificial Intelligence techniques such as <strong>Constraint Satisfaction Problems (CSP)</strong> and <strong>Forward Chaining</strong> can process illustrative symptom inputs and explain rule-based reasoning transparently.
+            </p>
+
+            <div class="flex flex-wrap items-center gap-4 pt-2">
+              <button onclick="navigate('symptoms')" class="px-6 py-3.5 rounded-2xl bg-white text-blue-700 font-bold hover:bg-sky-50 shadow-lg shadow-black/10 active:scale-95 transition-all flex items-center gap-2 text-xs sm:text-sm">
+                <i data-lucide="stethoscope" class="w-4 h-4 text-blue-600"></i>
+                Start Symptom Checker
+              </button>
+              <button onclick="navigate('csp')" class="px-6 py-3.5 rounded-2xl bg-sky-900/40 hover:bg-sky-900/60 text-white font-semibold backdrop-blur-md border border-white/20 active:scale-95 transition-all flex items-center gap-2 text-xs sm:text-sm">
+                <i data-lucide="network" class="w-4 h-4 text-cyan-200"></i>
+                Explore AI Engine
+              </button>
+            </div>
+
+            <!-- Active Memory Pill -->
+            <div class="pt-2 flex items-center gap-2.5 text-xs text-sky-100">
+              <span class="flex h-2.5 w-2.5 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-300 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-300"></span>
+              </span>
+              <span>Loaded in Working Memory:</span>
+              <button onclick="navigate('symptoms')" class="font-bold underline text-white hover:text-cyan-200 transition-colors">
+                <span id="home-fact-count">2</span> symptoms active
+              </button>
+            </div>
+          </div>
+
+          <!-- Interactive Medical AI Widget Illustration -->
+          <div class="lg:col-span-5 flex justify-center">
+            <div class="w-full max-w-md bg-white rounded-2xl p-6 shadow-2xl text-slate-800 border border-white/40 space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-2.5 h-2.5 rounded-full bg-rose-500"></div>
+                  <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
+                  <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                </div>
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Dual Inference Pipeline</span>
+              </div>
+
+              <div class="space-y-3">
+                <div class="p-3 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-between">
+                  <div class="flex items-center gap-2.5">
+                    <i data-lucide="stethoscope" class="w-4 h-4 text-sky-600"></i>
+                    <span class="text-xs font-semibold text-slate-700">Inputs (Working Memory)</span>
+                  </div>
+                  <span id="hero-facts-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-sky-200 text-sky-900">2 active</span>
+                </div>
+
+                <div class="flex justify-center text-slate-300">
+                  <i data-lucide="chevron-down" class="w-4 h-4 text-blue-400"></i>
+                </div>
+
+                <div class="p-3 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-between">
+                  <div class="flex items-center gap-2.5">
+                    <i data-lucide="network" class="w-4 h-4 text-purple-600"></i>
+                    <span class="text-xs font-semibold text-slate-700">CSP Constraint Pruning</span>
+                  </div>
+                  <span id="hero-csp-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-purple-200 text-purple-900">1 / 5 satisfied</span>
+                </div>
+
+                <div class="flex justify-center text-slate-300">
+                  <i data-lucide="chevron-down" class="w-4 h-4 text-blue-400"></i>
+                </div>
+
+                <div class="p-3 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-between">
+                  <div class="flex items-center gap-2.5">
+                    <i data-lucide="git-branch" class="w-4 h-4 text-teal-600"></i>
+                    <span class="text-xs font-semibold text-slate-700">Forward Chaining Deductions</span>
+                  </div>
+                  <span id="hero-fc-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-teal-200 text-teal-900">1 rule fired</span>
+                </div>
+              </div>
+
+              <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span class="text-slate-400">Engine Status</span>
+                <span class="font-bold text-emerald-600 flex items-center gap-1">
+                  <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Live & Synchronized
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Module Cards -->
+      <div>
+        <div class="text-center max-w-2xl mx-auto mb-8">
+          <h2 class="text-2xl font-black text-slate-900">Modular AI Knowledge Framework</h2>
+          <p class="text-slate-500 text-xs sm:text-sm mt-1">Explore each core AI mechanism designed for the Foundation of Artificial Intelligence curriculum.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div onclick="navigate('symptoms')" class="group bg-white rounded-2xl p-6 border border-sky-100 shadow-xs hover:shadow-xl hover:border-blue-200 hover:-translate-y-1 transition-all cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center mb-5 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                <i data-lucide="stethoscope" class="w-6 h-6"></i>
+              </div>
+              <h3 class="text-base font-bold text-slate-900 mb-1.5">1. Symptom Checker</h3>
+              <p class="text-xs text-slate-500 leading-relaxed">Select illustrative symptoms and instantly view real-time disease deductions.</p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-blue-600">
+              <span>Configure Inputs</span>
+              <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <div onclick="navigate('csp')" class="group bg-white rounded-2xl p-6 border border-sky-100 shadow-xs hover:shadow-xl hover:border-purple-200 hover:-translate-y-1 transition-all cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center mb-5 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                <i data-lucide="network" class="w-6 h-6"></i>
+              </div>
+              <h3 class="text-base font-bold text-slate-900 mb-1.5">2. CSP Engine</h3>
+              <p class="text-xs text-slate-500 leading-relaxed">Evaluates discrete variables V and binary domains D against relational constraints C.</p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-purple-600">
+              <span>Run CSP Pruning</span>
+              <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <div onclick="navigate('fc')" class="group bg-white rounded-2xl p-6 border border-sky-100 shadow-xs hover:shadow-xl hover:border-teal-200 hover:-translate-y-1 transition-all cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-200 text-teal-600 flex items-center justify-center mb-5 group-hover:bg-teal-600 group-hover:text-white transition-colors">
+                <i data-lucide="git-branch" class="w-6 h-6"></i>
+              </div>
+              <h3 class="text-base font-bold text-slate-900 mb-1.5">3. Forward Chaining</h3>
+              <p class="text-xs text-slate-500 leading-relaxed">Data-driven inference engine firing IF-THEN rules step-by-step from working memory.</p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-600">
+              <span>Step-by-Step Inference</span>
+              <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <div onclick="navigate('dashboard')" class="group bg-white rounded-2xl p-6 border border-sky-100 shadow-xs hover:shadow-xl hover:border-sky-200 hover:-translate-y-1 transition-all cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center mb-5 group-hover:bg-sky-600 group-hover:text-white transition-colors">
+                <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+              </div>
+              <h3 class="text-base font-bold text-slate-900 mb-1.5">4. AI Dashboard</h3>
+              <p class="text-xs text-slate-500 leading-relaxed">Inspect deductive trace logs, untriggered rules, and verified diagnostic metrics.</p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-sky-600">
+              <span>View Audit Trail</span>
+              <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Preset Scenarios Bar -->
+      <div class="bg-gradient-to-r from-sky-50 via-white to-blue-50 border border-sky-200 rounded-2xl p-6 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="p-3 bg-sky-600 text-white rounded-xl shadow-xs">
+            <i data-lucide="sliders" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h4 class="text-sm font-bold text-slate-900">Load Test Demonstration Scenarios:</h4>
+            <p class="text-xs text-slate-500">Instantly populate working memory with verified symptom combinations</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button onclick="loadScenario(['fever', 'cough'], 'Respiratory Flu')" class="px-3 py-1.5 rounded-xl bg-white hover:bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200 transition-all shadow-xs">
+            Fever + Cough
+          </button>
+          <button onclick="loadScenario(['fever', 'headache'], 'Viral Fever')" class="px-3 py-1.5 rounded-xl bg-white hover:bg-purple-50 text-purple-700 text-xs font-semibold border border-purple-200 transition-all shadow-xs">
+            Fever + Headache
+          </button>
+          <button onclick="loadScenario(['nausea', 'vomiting'], 'Gastroenteritis')" class="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200 transition-all shadow-xs">
+            Nausea + Vomiting
+          </button>
+          <button onclick="loadScenario(['cough', 'runny_nose'], 'Allergic Rhinitis')" class="px-3 py-1.5 rounded-xl bg-white hover:bg-teal-50 text-teal-700 text-xs font-semibold border border-teal-200 transition-all shadow-xs">
+            Cough + Runny Nose
+          </button>
+          <button onclick="loadScenario(['increased_thirst'], 'Unmatched Case')" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 transition-all shadow-xs">
+            Unmatched Case
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- 2. SYMPTOM CHECKER WITH LIVE PREDICTION                            -->
+    <!-- ================================================================== -->
+    <section id="view-symptoms" class="page-view hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-sky-100 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-1.5 text-sky-600 text-xs font-bold uppercase tracking-wider mb-1">
+            <i data-lucide="stethoscope" class="w-4 h-4"></i> Working Memory Constructor
+          </div>
+          <h2 class="text-2xl font-black text-slate-900">Symptom Selection & Live Prediction</h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1">
+            Select patient symptoms below. The system evaluates them against propositional rules in real time.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <span id="checker-count-badge" class="text-xs font-bold px-3 py-2 rounded-xl bg-blue-50 text-blue-700 border border-blue-200">
+            2 Symptoms Active
+          </span>
+          <button onclick="clearSymptoms()" class="px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all flex items-center gap-1.5">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Clear All
+          </button>
+        </div>
+      </div>
+
+      <!-- LIVE AI PREDICTION CARD (Immediately visible output!) -->
+      <div class="p-5 rounded-2xl bg-gradient-to-r from-sky-50 via-white to-indigo-50 border border-sky-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-sky-900 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Real-Time AI Prediction Output
+          </span>
+          <span id="live-match-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
+            1 Rule Triggered
+          </span>
+        </div>
+
+        <div id="live-disease-title" class="text-xl font-extrabold text-slate-900">
+          Common Cold / Respiratory Flu
+        </div>
+
+        <div id="live-disease-explanation" class="text-xs text-slate-600 bg-white/80 p-3 rounded-xl border border-sky-100 leading-relaxed font-mono">
+          Rule R1 matched: Fever + Cough &rarr; Classified as Common Cold / Respiratory Flu.
+        </div>
+      </div>
+
+      <!-- Search & Active Chips Container -->
+      <div class="bg-white rounded-2xl p-6 border border-sky-100 shadow-xs space-y-4">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+          <input
+            type="text"
+            id="symptom-search"
+            oninput="renderSymptomCategories()"
+            placeholder="Search symptoms (e.g., Fever, Cough, Nausea, Headache)..."
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+          >
+        </div>
+
+        <!-- Selected Chips -->
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+            Active Facts in Memory:
+          </span>
+          <div id="selected-chips" class="flex flex-wrap gap-2 min-h-[38px] p-2.5 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Categorized Symptoms Grid -->
+      <div id="category-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Bottom Nav Action -->
+      <div class="p-6 bg-gradient-to-r from-sky-600 to-blue-600 rounded-2xl text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <h4 class="font-bold text-sm sm:text-base">Ready to trace formal reasoning?</h4>
+          <p class="text-xs text-sky-100">Step through the Constraint Satisfaction Problem or Forward Chaining simulator.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="navigate('csp')" class="px-4 py-2.5 rounded-xl bg-white text-sky-700 font-bold hover:bg-sky-50 transition-all text-xs flex items-center gap-1.5 shadow-xs">
+            <i data-lucide="network" class="w-4 h-4 text-purple-600"></i> Proceed to CSP Engine
+          </button>
+          <button onclick="navigate('fc')" class="px-4 py-2.5 rounded-xl bg-sky-900/40 hover:bg-sky-900/60 text-white font-bold transition-all text-xs flex items-center gap-1.5 border border-white/20">
+            <i data-lucide="git-branch" class="w-4 h-4 text-teal-300"></i> Trace in Forward Chaining
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- 3. CSP ENGINE SECTION                                              -->
+    <!-- ================================================================== -->
+    <section id="view-csp" class="page-view hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-sky-100 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-1.5 text-purple-600 text-xs font-bold uppercase tracking-wider mb-1">
+            <i data-lucide="network" class="w-4 h-4"></i> Constraint Satisfaction Problem Demo
+          </div>
+          <h2 class="text-2xl font-black text-slate-900">CSP Filtering Engine</h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1">
+            Formalizes diagnostic reasoning as a CSP tuple <code>&lang;V, D, C&rang;</code> where relational constraints prune inconsistent disease categories.
+          </p>
+        </div>
+
+        <button onclick="runCspFiltering()" id="btn-run-csp" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md shadow-purple-500/20 active:scale-95 transition-all flex items-center gap-2">
+          <i data-lucide="play" class="w-3.5 h-3.5"></i>
+          <span>Run CSP Filtering</span>
+        </button>
+      </div>
+
+      <!-- CSP Pipeline Progress -->
+      <div class="bg-white rounded-2xl p-5 border border-sky-100 shadow-xs">
+        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-3">
+          Constraint Satisfaction Pipeline:
+        </span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <div class="p-3.5 rounded-xl bg-purple-50/70 border border-purple-200 font-semibold text-purple-900 flex justify-between items-center">
+            <span>1. Variables ($V$)</span>
+            <span class="font-mono text-purple-700">12 Symptoms</span>
+          </div>
+          <div class="p-3.5 rounded-xl bg-blue-50/70 border border-blue-200 font-semibold text-blue-900 flex justify-between items-center">
+            <span>2. Domains ($D$)</span>
+            <span class="font-mono text-blue-700">{ Yes, No }</span>
+          </div>
+          <div class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 font-semibold text-amber-900 flex justify-between items-center">
+            <span>3. Constraints ($C$)</span>
+            <span class="font-mono text-amber-700">5 Relational</span>
+          </div>
+          <div class="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 font-semibold text-emerald-900 flex justify-between items-center">
+            <span>4. Filtered Candidates</span>
+            <span id="csp-pipeline-count" class="font-mono text-emerald-700">1 Solved</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Glassmorphism Cards: A. Variables, B. Domains, C. Constraints -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Card A: Variables -->
+        <div class="bg-white rounded-2xl p-6 border border-sky-100 shadow-xs flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+              <div class="flex items-center gap-2">
+                <div class="p-2 bg-purple-100 text-purple-700 rounded-xl">
+                  <i data-lucide="layers" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-slate-900">Card A: Variables ($V$)</h3>
+                  <p class="text-[10px] text-slate-400">Assigned States</p>
+                </div>
+              </div>
+              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-purple-50 text-purple-700">V1 - V12</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-3">Symptom variables mapped to discrete states:</p>
+            <div id="csp-vars-list" class="space-y-1.5 max-h-64 overflow-y-auto pr-1 text-xs font-mono custom-scrollbar">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500" id="csp-vars-summary">
+            Active: 2 | Absent: 10
+          </div>
+        </div>
+
+        <!-- Card B: Domains -->
+        <div class="bg-white rounded-2xl p-6 border border-sky-100 shadow-xs flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+              <div class="flex items-center gap-2">
+                <div class="p-2 bg-blue-100 text-blue-700 rounded-xl">
+                  <i data-lucide="sliders" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-slate-900">Card B: Domains ($D$)</h3>
+                  <p class="text-[10px] text-slate-400">Binary Valuation Range</p>
+                </div>
+              </div>
+              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700">D = {0, 1}</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-3">Discrete binary assignment for each variable:</p>
+
+            <div class="space-y-3">
+              <div class="p-3.5 rounded-xl bg-blue-50/60 border border-blue-200">
+                <div class="flex items-center justify-between text-xs font-bold text-blue-900 mb-1">
+                  <span>Domain Value: "Yes" (1)</span>
+                  <span class="text-[10px] bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full">Symptom Present</span>
+                </div>
+                <p class="text-[11px] text-slate-600">Asserted into working memory when the user verifies symptom presence.</p>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1">
+                  <span>Domain Value: "No" (0)</span>
+                  <span class="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full">Symptom Absent</span>
+                </div>
+                <p class="text-[11px] text-slate-500">Default assignment for unselected conditions.</p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center gap-1">
+            <i data-lucide="info" class="w-3.5 h-3.5 text-blue-600"></i>
+            <span>Constraint checking prunes inconsistent domains.</span>
+          </div>
+        </div>
+
+        <!-- Card C: Constraints -->
+        <div class="bg-white rounded-2xl p-6 border border-sky-100 shadow-xs flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+              <div class="flex items-center gap-2">
+                <div class="p-2 bg-amber-100 text-amber-700 rounded-xl">
+                  <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-slate-900">Card C: Constraints ($C$)</h3>
+                  <p class="text-[10px] text-slate-400">Relational Predicates</p>
+                </div>
+              </div>
+              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700">5 Rules</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-3">Relational constraints evaluated against active variables:</p>
+            <div id="csp-rules-list" class="space-y-2 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between" id="csp-constraints-summary">
+            <span>Satisfied: 1</span>
+            <span>Violated: 4</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CSP Filtering Output Console -->
+      <div class="bg-white rounded-2xl p-6 border border-sky-100 shadow-xs space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>
+            CSP Constraint Satisfaction & Pruning Log
+          </h3>
+          <span id="csp-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700">Ready</span>
+        </div>
+        <div id="csp-output" class="p-4 rounded-xl bg-slate-900 text-emerald-400 font-mono text-xs leading-relaxed space-y-1">
+          // Click "Run CSP Filtering" above to test relational constraint satisfaction.
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- 4. FORWARD CHAINING ENGINE SECTION                                 -->
+    <!-- ================================================================== -->
+    <section id="view-fc" class="page-view hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-sky-100 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-1.5 text-teal-600 text-xs font-bold uppercase tracking-wider mb-1">
+            <i data-lucide="git-branch" class="w-4 h-4"></i> Data-Driven Inference Engine
+          </div>
+          <h2 class="text-2xl font-black text-slate-900">Forward Chaining Demonstration</h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1">
+            Forward chaining starts with known facts in Working Memory, tests production rules, and derives new conclusions.
+          </p>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="startFcExecution()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-bold text-xs shadow-md shadow-teal-500/20 active:scale-95 transition-all flex items-center gap-2">
+            <i data-lucide="play" class="w-3.5 h-3.5"></i>
+            <span>Auto Run</span>
+          </button>
+          <button onclick="nextFcStep()" class="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition-all flex items-center gap-1.5">
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            <span id="fc-step-label">Next Step (0/5)</span>
+          </button>
+          <button onclick="resetFc()" class="px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-xs transition-all flex items-center gap-1.5">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span>Reset</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Working Memory vs Rule Execution Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left: Working Memory -->
+        <div class="lg:col-span-4 bg-white rounded-2xl p-6 border border-sky-100 shadow-xs flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+              <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="cpu" class="w-4 h-4 text-blue-600"></i>
+                Working Memory (Facts)
+              </h3>
+              <span id="fc-facts-count-badge" class="text-xs font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                2 Facts
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 mb-3">Initial propositional facts asserted into working memory:</p>
+            <div id="fc-facts-initial" class="space-y-2 max-h-52 overflow-y-auto pr-1 custom-scrollbar">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+              Derived Disease Facts:
+            </span>
+            <div id="fc-facts-derived" class="flex flex-wrap gap-1.5">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Rule Scan Stepper -->
+        <div class="lg:col-span-8 bg-white rounded-2xl p-6 border border-sky-100 shadow-xs space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="git-branch" class="w-4 h-4 text-teal-600"></i>
+              Knowledge Base Production Rules
+            </h3>
+            <span id="fc-step-indicator" class="text-xs font-mono text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full font-bold">
+              Step 0 / 5
+            </span>
+          </div>
+
+          <div id="fc-rules-list" class="space-y-3">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Execution Trace Console -->
+      <div class="bg-white rounded-2xl p-6 border border-sky-100 shadow-xs space-y-2">
+        <h3 class="text-sm font-bold text-slate-900">Execution Trace Console</h3>
+        <div id="fc-log" class="p-4 rounded-xl bg-slate-900 text-emerald-400 font-mono text-xs leading-relaxed max-h-48 overflow-y-auto space-y-1">
+          // Ready for forward chaining execution. Click 'Auto Run' or 'Next Step'.
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- 5. AI RESULTS DASHBOARD SECTION                                    -->
+    <!-- ================================================================== -->
+    <section id="view-dashboard" class="page-view hidden space-y-6">
+      <!-- Clinical Disclaimer -->
+      <div class="p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 flex items-start gap-3.5 shadow-xs">
+        <i data-lucide="shield-alert" class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"></i>
+        <div>
+          <h4 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-amber-800">
+            Educational AI Demonstration Disclaimer
+          </h4>
+          <p class="text-xs sm:text-sm mt-0.5 leading-relaxed text-amber-900/90">
+            This is an educational AI demonstration, not a medical diagnostic tool. It cannot determine whether you have a disease. For health concerns, consult a qualified healthcare professional.
+          </p>
+        </div>
+      </div>
+
+      <!-- Calculated Summary Metrics -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-2xl border border-sky-100 shadow-xs">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Facts in Memory</span>
+          <div class="mt-2 flex items-baseline justify-between">
+            <span id="dash-symptoms-count" class="text-3xl font-black text-blue-600">2</span>
+            <span class="text-xs font-medium text-slate-500">Symptoms</span>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-sky-100 shadow-xs">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Triggered Rules</span>
+          <div class="mt-2 flex items-baseline justify-between">
+            <span id="dash-rules-triggered" class="text-3xl font-black text-emerald-600">1</span>
+            <span class="text-xs font-medium text-slate-500">of 5 Rules</span>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-sky-100 shadow-xs">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Untriggered Rules</span>
+          <div class="mt-2 flex items-baseline justify-between">
+            <span id="dash-rules-untriggered" class="text-3xl font-black text-slate-400">4</span>
+            <span class="text-xs font-medium text-slate-500">Rules Skipped</span>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-sky-100 shadow-xs">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Deduced Conclusions</span>
+          <div class="mt-2 flex items-baseline justify-between">
+            <span id="dash-candidates-count" class="text-3xl font-black text-indigo-600">1</span>
+            <span class="text-xs font-medium text-slate-500">Diseases</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Candidates & Reasoning Synthesis -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-2xl p-6 border border-sky-100 shadow-xs space-y-3">
+          <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+            Deduced Candidate Diseases
+          </h3>
+          <p class="text-xs text-slate-500">Confirmed candidate classifications satisfying complete rule premises:</p>
+          <div id="dash-candidates-list" class="space-y-2">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 border border-sky-100 shadow-xs space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i data-lucide="git-merge" class="w-4 h-4 text-sky-600"></i>
+              Reasoning Derivation Trace
+            </h3>
+            <button onclick="navigate('rules')" class="text-xs text-sky-600 hover:underline font-semibold">
+              View In Rule Explorer &rarr;
+            </button>
+          </div>
+          <div id="dash-trace-content" class="p-4 rounded-xl bg-slate-50 text-xs text-slate-600 leading-relaxed space-y-2 font-mono">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- 6. RULE EXPLORER SECTION                                           -->
+    <!-- ================================================================== -->
+    <section id="view-rules" class="page-view hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-sky-100 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-1.5 text-blue-600 text-xs font-bold uppercase tracking-wider mb-1">
+            <i data-lucide="book-open" class="w-4 h-4"></i> Knowledge Base Inspection
+          </div>
+          <h2 class="text-2xl font-black text-slate-900">Rule Explorer</h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1">
+            Inspect all IF-THEN rules in the expert knowledge base. Live indicators indicate real-time satisfaction against current symptoms.
+          </p>
+        </div>
+
+        <div class="text-xs text-slate-500 font-medium">
+          Active Symptoms in Context: <strong id="rules-active-count" class="text-blue-600">2</strong>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Rule Cards List -->
+        <div class="lg:col-span-7 space-y-4" id="rules-cards-container">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- Rule Inspector Side Panel -->
+        <div class="lg:col-span-5">
+          <div id="rule-inspector-card" class="bg-white rounded-2xl p-6 border border-sky-100 shadow-xs sticky top-28 space-y-5">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- 7. TEST CASES SECTION                                              -->
+    <!-- ================================================================== -->
+    <section id="view-tests" class="page-view hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-sky-100 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-1.5 text-blue-600 text-xs font-bold uppercase tracking-wider mb-1">
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i> Automated Verification Harness
+          </div>
+          <h2 class="text-2xl font-black text-slate-900">Automated Test Suites</h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1">
+            Executes predefined symptom vectors through the genuine Forward Chaining and CSP inference logic.
+          </p>
+        </div>
+
+        <button onclick="runAllTests()" id="btn-run-all-tests" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white font-bold text-xs shadow-md shadow-emerald-500/20 active:scale-95 transition-all flex items-center gap-2">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>Run All Test Cases</span>
+        </button>
+      </div>
+
+      <!-- Test Metrics Bar -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded-2xl border border-sky-100 shadow-xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Total Test Suites</span>
+            <div class="text-2xl font-black text-slate-800 mt-1">5</div>
+          </div>
+          <i data-lucide="file-text" class="w-8 h-8 text-blue-400 opacity-60"></i>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-emerald-100 shadow-xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-emerald-600 font-semibold uppercase tracking-wider">Passed Tests</span>
+            <div id="tests-passed-count" class="text-2xl font-black text-emerald-600 mt-1">5</div>
+          </div>
+          <i data-lucide="check-circle-2" class="w-8 h-8 text-emerald-500 opacity-60"></i>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-rose-100 shadow-xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-rose-600 font-semibold uppercase tracking-wider">Failed Tests</span>
+            <div id="tests-failed-count" class="text-2xl font-black text-rose-600 mt-1">0</div>
+          </div>
+          <i data-lucide="x-circle" class="w-8 h-8 text-rose-500 opacity-60"></i>
+        </div>
+      </div>
+
+      <!-- Test Table -->
+      <div class="bg-white rounded-2xl border border-sky-100 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 border-b border-slate-100 uppercase tracking-wider font-semibold">
+              <tr>
+                <th class="px-6 py-4">Test Case ID</th>
+                <th class="px-6 py-4">Input Symptoms</th>
+                <th class="px-6 py-4">Expected Demo Result</th>
+                <th class="px-6 py-4">Actual Demo Result</th>
+                <th class="px-6 py-4">Status</th>
+                <th class="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="test-cases-table-body" class="divide-y divide-slate-100">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- 8. ABOUT PROJECT SECTION                                           -->
+    <!-- ================================================================== -->
+    <section id="view-about" class="page-view hidden space-y-6">
+      <div class="bg-gradient-to-r from-blue-700 via-indigo-700 to-sky-700 rounded-3xl p-8 sm:p-10 text-white shadow-xl shadow-blue-500/10">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold uppercase tracking-wider text-sky-100 border border-white/20 mb-3">
+          <i data-lucide="graduation-cap" class="w-4 h-4"></i> Academic AI Micro-Project Submission
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-black tracking-tight">
+          CSP and Forward Chaining-Based AI Disease Prediction Support System
+        </h1>
+        <p class="text-sky-100 text-xs sm:text-sm mt-2 max-w-3xl leading-relaxed">
+          An interactive educational implementation of symbolic AI, constraint satisfaction filtering, and deductive forward chaining inference.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Student Details -->
+        <div class="lg:col-span-5 space-y-6">
+          <div class="bg-white rounded-2xl p-6 border border-sky-100 shadow-xs space-y-4">
+            <h3 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+              <i data-lucide="graduation-cap" class="w-5 h-5 text-blue-600"></i>
+              Student & Course Details
+            </h3>
+
+            <div class="space-y-3 text-xs">
+              <div class="flex justify-between py-1.5 border-b border-slate-50">
+                <span class="text-slate-400">Student Name:</span>
+                <strong class="text-slate-800 font-semibold">Bhagyashri Prithviraj Kshirsagar</strong>
+              </div>
+              <div class="flex justify-between py-1.5 border-b border-slate-50">
+                <span class="text-slate-400">Roll Number:</span>
+                <strong class="text-slate-800 font-mono font-bold text-sky-700">1025091017</strong>
+              </div>
+              <div class="flex justify-between py-1.5 border-b border-slate-50">
+                <span class="text-slate-400">Subject:</span>
+                <strong class="text-slate-800">Foundation of Artificial Intelligence (FAI)</strong>
+              </div>
+              <div class="flex justify-between py-1.5 border-b border-slate-50">
+                <span class="text-slate-400">Course Code:</span>
+                <strong class="text-slate-800 font-mono">2ADPC204</strong>
+              </div>
+              <div class="flex justify-between py-1.5 border-b border-slate-50">
+                <span class="text-slate-400">Academic Year:</span>
+                <strong class="text-slate-800">2026–2027</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl p-6 border border-sky-100 shadow-xs space-y-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Core AI Methodologies</h4>
+            <div class="flex flex-wrap gap-2">
+              <span class="px-3 py-1.5 rounded-xl bg-purple-50 text-purple-700 font-semibold text-xs border border-purple-200">
+                Constraint Satisfaction Problem (CSP)
+              </span>
+              <span class="px-3 py-1.5 rounded-xl bg-teal-50 text-teal-700 font-semibold text-xs border border-teal-200">
+                Forward Chaining Inference
+              </span>
+              <span class="px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 font-semibold text-xs border border-blue-200">
+                Propositional Expert Knowledge
+              </span>
+              <span class="px-3 py-1.5 rounded-xl bg-sky-50 text-sky-700 font-semibold text-xs border border-sky-200">
+                Transparent Reasoning Audit
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Objectives & Limitations -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="bg-white rounded-2xl p-6 border border-sky-100 shadow-xs space-y-3">
+            <h3 class="text-sm font-bold text-slate-900">Project Aim & Objectives</h3>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <strong>Aim:</strong> To demonstrate how <strong>Constraint Satisfaction Problems</strong> and <strong>Forward Chaining</strong> process illustrative symptom inputs and explain rule-based reasoning in an accessible, visual, and transparent manner.
+            </p>
+            <ul class="text-xs sm:text-sm text-slate-600 space-y-2 list-disc list-inside">
+              <li>Implement discrete variables V and binary domains {Yes, No} to prune inconsistent diagnostic hypotheses.</li>
+              <li>Implement a data-driven Forward Chaining engine with live rule premise matching and step execution.</li>
+              <li>Provide a real-time output console that instantly displays predicted diseases on symptom toggling.</li>
+              <li>Maintain strict transparency without black-box machine learning opacity.</li>
+            </ul>
+          </div>
+
+          <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-6 text-amber-950 space-y-2">
+            <h3 class="text-xs sm:text-sm font-bold flex items-center gap-2 text-amber-900">
+              <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600"></i>
+              Project Limitations & Responsible AI Notice
+            </h3>
+            <p class="text-xs leading-relaxed text-amber-900/90">
+              This software operates strictly within predefined academic demonstration rules and carries no certified medical diagnostic capability. It does not replace clinical pathology, lab work, radiological imaging, or physician consultation. Designed exclusively for evaluating logical AI algorithms under the 2ADPC204 curriculum.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="mt-16 bg-white border-t border-sky-100 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-sky-600 text-white flex items-center justify-center font-bold text-xs">
+          M
+        </div>
+        <span><strong>MediLogic AI</strong> &bull; FAI Micro-Project (Course Code: 2ADPC204)</span>
+      </div>
+      <div class="text-center sm:text-right">
+        <span>Student: <strong>Bhagyashri Prithviraj Kshirsagar</strong> (Roll: <strong>1025091017</strong>) &bull; Academic Year 2026–2027</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPT LOGIC CORE -->
+  <script>
+    // ------------------------------------------------------------------------
+    // KNOWLEDGE BASE DATA SPECIFICATIONS
+    // ------------------------------------------------------------------------
+    const SYMPTOMS_DATA = [
+      { id: 'fever', name: 'Fever', category: 'General', desc: 'Core body temperature elevated above 37.5°C' },
+      { id: 'fatigue', name: 'Fatigue', category: 'General', desc: 'Generalized lethargy, exhaustion, and muscle weakness' },
+      { id: 'body_pain', name: 'Body Pain', category: 'General', desc: 'Diffuse musculoskeletal aches and tenderness' },
+      { id: 'cough', name: 'Cough', category: 'Respiratory', desc: 'Frequent dry, spasmodic or productive bronchial cough' },
+      { id: 'sore_throat', name: 'Sore Throat', category: 'Respiratory', desc: 'Pharyngeal irritation and pain during swallowing' },
+      { id: 'runny_nose', name: 'Runny Nose', category: 'Respiratory', desc: 'Excessive nasal discharge or mucosal congestion' },
+      { id: 'nausea', name: 'Nausea', category: 'Digestive', desc: 'Persistent sensation of gastric distress and urge to vomit' },
+      { id: 'vomiting', name: 'Vomiting', category: 'Digestive', desc: 'Involuntary reflex expulsion of gastric contents' },
+      { id: 'stomach_pain', name: 'Stomach Pain', category: 'Digestive', desc: 'Abdominal cramps, localized spasms or dull ache' },
+      { id: 'headache', name: 'Headache', category: 'Neurological', desc: 'Diffuse, throbbing or tension cephalalgia' },
+      { id: 'dizziness', name: 'Dizziness', category: 'Neurological', desc: 'Lightheadedness, equilibrium deficit or vertigo' },
+      { id: 'increased_thirst', name: 'Increased Thirst', category: 'Other', desc: 'Unquenched polydipsia requiring continuous hydration' }
+    ];
+
+    const RULES_DATA = [
+      {
+        id: 1,
+        code: 'R1',
+        premises: ['fever', 'cough'],
+        conclusion: 'Common Cold / Respiratory Flu',
+        description: 'Acute Respiratory Syndrome Demo',
+        clinicalRationale: 'Illustrative rule evaluating co-occurrence of respiratory bronchospasm and hyperthermia.'
+      },
+      {
+        id: 2,
+        code: 'R2',
+        premises: ['fever', 'headache'],
+        conclusion: 'Acute Viral Fever / Migraine Aura',
+        description: 'Systemic Febrile Syndrome Demo',
+        clinicalRationale: 'Illustrative rule assessing concurrent central cranial tension and elevated thermal state.'
+      },
+      {
+        id: 3,
+        code: 'R3',
+        premises: ['cough', 'runny_nose'],
+        conclusion: 'Allergic Rhinitis / Rhinovirus',
+        description: 'Nasopharyngeal Rhinovirus Demo',
+        clinicalRationale: 'Illustrative rule identifying combined nasal rhinorrhea and mucosal airway clearing reflex.'
+      },
+      {
+        id: 4,
+        code: 'R4',
+        premises: ['nausea', 'vomiting'],
+        conclusion: 'Acute Gastroenteritis / Food Poisoning',
+        description: 'Gastrointestinal Distress Demo',
+        clinicalRationale: 'Illustrative rule flagging simultaneous gastric queasiness and retrograde emesis.'
+      },
+      {
+        id: 5,
+        code: 'R5',
+        premises: ['fever', 'body_pain', 'fatigue'],
+        conclusion: 'Dengue-like Viral Syndrome',
+        description: 'Generalized Viral Asthenia Demo',
+        clinicalRationale: 'Illustrative rule capturing classic acute viral asthenia, pyrexia, and widespread myalgia.'
+      }
+    ];
+
+    const CSP_CONSTRAINTS = [
+      { id: 'C1', target: 'Common Cold / Respiratory Flu', condition: 'V_fever == Yes ∧ V_cough == Yes', evaluate: s => s.has('fever') && s.has('cough') },
+      { id: 'C2', target: 'Acute Viral Fever / Migraine Aura', condition: 'V_fever == Yes ∧ V_headache == Yes', evaluate: s => s.has('fever') && s.has('headache') },
+      { id: 'C3', target: 'Allergic Rhinitis / Rhinovirus', condition: 'V_cough == Yes ∧ V_runny_nose == Yes', evaluate: s => s.has('cough') && s.has('runny_nose') },
+      { id: 'C4', target: 'Acute Gastroenteritis / Food Poisoning', condition: 'V_nausea == Yes ∧ V_vomiting == Yes', evaluate: s => s.has('nausea') && s.has('vomiting') },
+      { id: 'C5', target: 'Dengue-like Viral Syndrome', condition: 'V_fever == Yes ∧ V_body_pain == Yes ∧ V_fatigue == Yes', evaluate: s => s.has('fever') && s.has('body_pain') && s.has('fatigue') }
+    ];
+
+    const TEST_CASES_DATA = [
+      { id: 'TC01', symptoms: ['fever', 'cough'], expected: 'Common Cold / Respiratory Flu' },
+      { id: 'TC02', symptoms: ['fever', 'headache'], expected: 'Acute Viral Fever / Migraine Aura' },
+      { id: 'TC03', symptoms: ['cough', 'runny_nose'], expected: 'Allergic Rhinitis / Rhinovirus' },
+      { id: 'TC04', symptoms: ['nausea', 'vomiting'], expected: 'Acute Gastroenteritis / Food Poisoning' },
+      { id: 'TC05', symptoms: ['increased_thirst'], expected: 'No Predefined Rule Matched' }
+    ];
+
+    // ------------------------------------------------------------------------
+    // APPLICATION STATE
+    // ------------------------------------------------------------------------
+    let selectedSymptoms = new Set(['fever', 'cough']);
+    let currentTab = 'home';
+    let inspectedRuleId = 1;
+    let fcStep = 0;
+    let fcDerivedFacts = [];
+    let fcAutoTimer = null;
+    let testResults = {};
+
+    // ------------------------------------------------------------------------
+    // TOAST HELPER
+    // ------------------------------------------------------------------------
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-text');
+      if (!toast || !text) return;
+      text.textContent = message;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 2600);
+    }
+
+    // ------------------------------------------------------------------------
+    // NAVIGATION ROUTER
+    // ------------------------------------------------------------------------
+    function navigate(tabId) {
+      currentTab = tabId;
+      document.querySelectorAll('.page-view').forEach(p => p.classList.add('hidden'));
+      const activeEl = document.getElementById(`view-${tabId}`);
+      if (activeEl) activeEl.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const isCurrent = btn.getAttribute('data-target') === tabId;
+        if (isCurrent) {
+          btn.className = 'nav-btn px-3 py-2 rounded-xl text-xs font-semibold bg-blue-50 text-blue-700 shadow-xs border border-blue-200/60 flex items-center gap-1.5';
+        } else {
+          btn.className = 'nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center gap-1.5';
+        }
+      });
+
+      renderAll();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    // ------------------------------------------------------------------------
+    // SYMPTOM LOGIC & SCENARIOS
+    // ------------------------------------------------------------------------
+    function toggleSymptom(symId) {
+      if (selectedSymptoms.has(symId)) {
+        selectedSymptoms.delete(symId);
+        showToast(`Removed symptom: ${symId}`);
+      } else {
+        selectedSymptoms.add(symId);
+        showToast(`Added symptom: ${symId}`);
+      }
+      renderAll();
+    }
+
+    function clearSymptoms() {
+      selectedSymptoms.clear();
+      showToast('Working memory cleared');
+      renderAll();
+    }
+
+    function loadScenario(symptomsList, name) {
+      selectedSymptoms = new Set(symptomsList);
+      showToast(`Loaded scenario: ${name}`);
+      renderAll();
+      navigate('symptoms');
+    }
+
+    // ------------------------------------------------------------------------
+    // CORE DEDUCTIVE INFERENCE
+    // ------------------------------------------------------------------------
+    function evaluateSymptomSet(symSet) {
+      const matched = RULES_DATA.filter(r => r.premises.every(p => symSet.has(p)));
+      if (matched.length > 0) {
+        return matched.map(m => m.conclusion).join(', ');
+      }
+      return 'No Predefined Rule Matched';
+    }
+
+    // ------------------------------------------------------------------------
+    // CSP ENGINE LOGIC
+    // ------------------------------------------------------------------------
+    function runCspFiltering() {
+      renderCspSection();
+      let log = ['>>> Initializing CSP Relational Constraint Evaluation on active variables...'];
+      let satisfiedList = [];
+
+      CSP_CONSTRAINTS.forEach(c => {
+        const isSatisfied = c.evaluate(selectedSymptoms);
+        if (isSatisfied) {
+          satisfiedList.push(c.target);
+          log.push(`[SATISFIED] ${c.id}: (${c.condition}) => Retaining Candidate: ${c.target}`);
+        } else {
+          log.push(`[VIOLATED]  ${c.id}: (${c.condition}) => Pruning Candidate: ${c.target}`);
+        }
+      });
+
+      const badge = document.getElementById('csp-badge');
+      const pipeCount = document.getElementById('csp-pipeline-count');
+      if (satisfiedList.length > 0) {
+        log.push(`\n>>> Final Consistent CSP Solution Set: { ${satisfiedList.join(', ')} }`);
+        if (badge) {
+          badge.innerText = `${satisfiedList.length} Solved`;
+          badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800';
+        }
+        if (pipeCount) pipeCount.innerText = `${satisfiedList.length} Retained`;
+      } else {
+        log.push('\n>>> Final Consistent CSP Solution Set: Empty Set (All hypotheses pruned by active constraints)');
+        if (badge) {
+          badge.innerText = 'All Pruned';
+          badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800';
+        }
+        if (pipeCount) pipeCount.innerText = '0 Retained';
+      }
+
+      const out = document.getElementById('csp-output');
+      if (out) out.innerHTML = log.map(l => `<div>${l}</div>`).join('');
+      showToast('CSP Relational constraints evaluated');
+    }
+
+    // ------------------------------------------------------------------------
+    // FORWARD CHAINING CONTROLLERS
+    // ------------------------------------------------------------------------
+    function resetFc() {
+      clearInterval(fcAutoTimer);
+      fcStep = 0;
+      fcDerivedFacts = [];
+      const out = document.getElementById('fc-log');
+      if (out) out.innerHTML = '// Ready for forward chaining execution. Click "Auto Run" or "Next Step".';
+      const ind = document.getElementById('fc-step-indicator');
+      if (ind) ind.innerText = 'Step 0 / 5';
+      const lbl = document.getElementById('fc-step-label');
+      if (lbl) lbl.innerText = 'Next Step (0/5)';
+      renderForwardChainingSection();
+    }
+
+    function nextFcStep() {
+      if (fcStep >= RULES_DATA.length) {
+        showToast('All production rules have been evaluated');
+        return;
+      }
+      fcStep++;
+      const currentRule = RULES_DATA[fcStep - 1];
+      const isFired = currentRule.premises.every(p => selectedSymptoms.has(p));
+      const log = document.getElementById('fc-log');
+
+      document.getElementById('fc-step-indicator').innerText = `Step ${fcStep} / 5`;
+      document.getElementById('fc-step-label').innerText = `Next Step (${fcStep}/5)`;
+
+      if (isFired) {
+        if (!fcDerivedFacts.includes(currentRule.conclusion)) {
+          fcDerivedFacts.push(currentRule.conclusion);
+        }
+        log.innerHTML += `<div>[RULE FIRED] ${currentRule.code}: Premises (${currentRule.premises.join(', ')}) are TRUE in Working Memory &rarr; Asserted '${currentRule.conclusion}'</div>`;
+      } else {
+        const missing = currentRule.premises.filter(p => !selectedSymptoms.has(p));
+        log.innerHTML += `<div class="text-slate-400">[RULE SKIPPED] ${currentRule.code}: Missing condition (${missing.join(', ')})</div>`;
+      }
+
+      renderForwardChainingSection();
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function startFcExecution() {
+      resetFc();
+      fcAutoTimer = setInterval(() => {
+        if (fcStep < RULES_DATA.length) {
+          nextFcStep();
+        } else {
+          clearInterval(fcAutoTimer);
+          showToast('Forward Chaining execution completed');
+        }
+      }, 600);
+    }
+
+    // ------------------------------------------------------------------------
+    // TEST CASES CONTROLLER
+    // ------------------------------------------------------------------------
+    function runSingleTest(tcId) {
+      const tc = TEST_CASES_DATA.find(t => t.id === tcId);
+      if (!tc) return;
+      const actual = evaluateSymptomSet(new Set(tc.symptoms));
+      const passed = (actual === tc.expected);
+      testResults[tcId] = { actual, passed };
+      renderTestCasesSection();
+      showToast(`Test ${tcId}: ${passed ? 'PASSED' : 'FAILED'}`);
+    }
+
+    function runAllTests() {
+      TEST_CASES_DATA.forEach(tc => {
+        const actual = evaluateSymptomSet(new Set(tc.symptoms));
+        const passed = (actual === tc.expected);
+        testResults[tc.id] = { actual, passed };
+      });
+      renderTestCasesSection();
+      showToast('All 5 predefined test cases evaluated');
+    }
+
+    // ------------------------------------------------------------------------
+    // UI RENDERERS
+    // ------------------------------------------------------------------------
+    function renderBadges() {
+      const count = selectedSymptoms.size;
+      const navBadge = document.getElementById('nav-badge-count');
+      const homeFact = document.getElementById('home-fact-count');
+      const checkBadge = document.getElementById('checker-count-badge');
+      const rulesCount = document.getElementById('rules-active-count');
+
+      if (navBadge) navBadge.textContent = count;
+      if (homeFact) homeFact.textContent = count;
+      if (checkBadge) checkBadge.textContent = `${count} Symptom${count === 1 ? '' : 's'} Active`;
+      if (rulesCount) rulesCount.textContent = count;
+
+      // Hero Widget stats
+      const satisfiedCount = CSP_CONSTRAINTS.filter(c => c.evaluate(selectedSymptoms)).length;
+      const firedCount = RULES_DATA.filter(r => r.premises.every(p => selectedSymptoms.has(p))).length;
+
+      const hFacts = document.getElementById('hero-facts-badge');
+      const hCsp = document.getElementById('hero-csp-badge');
+      const hFc = document.getElementById('hero-fc-badge');
+
+      if (hFacts) hFacts.textContent = `${count} active`;
+      if (hCsp) hCsp.textContent = `${satisfiedCount} / 5 satisfied`;
+      if (hFc) hFc.textContent = `${firedCount} rule${firedCount === 1 ? '' : 's'} fired`;
+    }
+
+    function renderChips() {
+      const chips = document.getElementById('selected-chips');
+      if (!chips) return;
+
+      if (selectedSymptoms.size === 0) {
+        chips.innerHTML = `<span class="text-xs text-slate-400 italic">No symptoms selected yet. Click any symptom card below.</span>`;
+        return;
+      }
+
+      chips.innerHTML = Array.from(selectedSymptoms).map(id => {
+        const sym = SYMPTOMS_DATA.find(s => s.id === id);
+        return `
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-sky-600 to-blue-600 text-white shadow-xs">
+            <i data-lucide="check" class="w-3.5 h-3.5 stroke-[3]"></i>
+            ${sym ? sym.name : id}
+            <button onclick="toggleSymptom('${id}')" class="hover:bg-white/20 rounded-md p-0.5 ml-1 transition-colors">
+              <i data-lucide="x" class="w-3 h-3"></i>
+            </button>
+          </span>
+        `;
+      }).join('');
+    }
+
+    function renderLivePredictionCard() {
+      const titleEl = document.getElementById('live-disease-title');
+      const badgeEl = document.getElementById('live-match-badge');
+      const reasonEl = document.getElementById('live-disease-explanation');
+      if (!titleEl || !badgeEl || !reasonEl) return;
+
+      if (selectedSymptoms.size === 0) {
+        titleEl.innerText = "No Symptoms Selected";
+        titleEl.className = "text-xl font-bold text-slate-400";
+        badgeEl.innerText = "Awaiting Input";
+        badgeEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-200 text-slate-600";
+        reasonEl.innerText = "Please select one or more clinical symptoms below to trigger inference.";
+        return;
+      }
+
+      const triggered = RULES_DATA.filter(r => r.premises.every(p => selectedSymptoms.has(p)));
+
+      if (triggered.length > 0) {
+        const diseaseNames = triggered.map(t => t.conclusion).join(' OR ');
+        titleEl.innerText = diseaseNames;
+        titleEl.className = "text-xl font-black text-emerald-700";
+        badgeEl.innerText = `${triggered.length} Rule(s) Triggered`;
+        badgeEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800";
+        reasonEl.innerHTML = triggered.map(t => `<strong>${t.code}:</strong> IF (${t.premises.join(' ∧ ')}) &rarr; Concluded: <em>${t.conclusion}</em> (${t.clinicalRationale})`).join('<br>');
+      } else {
+        titleEl.innerText = "No Predefined Disease Matched";
+        titleEl.className = "text-xl font-bold text-rose-600";
+        badgeEl.innerText = "0 Rules Satisfied";
+        badgeEl.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800";
+        reasonEl.innerText = "The current combination of selected symptoms does not satisfy all antecedent premises of any rule in knowledge base. Try selecting co-occurring symptoms like Fever + Cough or Nausea + Vomiting.";
+      }
+    }
+
+    function renderSymptomCategories() {
+      const search = (document.getElementById('symptom-search')?.value || '').toLowerCase();
+      const cont = document.getElementById('category-container');
+      if (!cont) return;
+
+      const categories = ['General', 'Respiratory', 'Digestive', 'Neurological', 'Other'];
+      cont.innerHTML = categories.map(cat => {
+        const items = SYMPTOMS_DATA.filter(s => s.category === cat && (s.name.toLowerCase().includes(search) || s.desc.toLowerCase().includes(search)));
+        if (items.length === 0) return '';
+
+        return `
+          <div class="bg-white rounded-2xl p-5 border border-sky-100 shadow-xs space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+              <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-sky-600"></span> ${cat}
+              </span>
+              <span class="text-[11px] text-slate-400 font-medium">${items.length} items</span>
+            </div>
+
+            <div class="space-y-2">
+              ${items.map(sym => {
+                const isSelected = selectedSymptoms.has(sym.id);
+                return `
+                  <button onclick="toggleSymptom('${sym.id}')"
+                    class="w-full text-left p-3 rounded-xl border text-xs transition-all select-none flex items-center justify-between ${
+                      isSelected
+                        ? 'bg-sky-50 border-sky-400 ring-1 ring-sky-400 text-sky-950 font-semibold'
+                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
+                    }">
+                    <div>
+                      <div class="font-bold text-slate-900">${sym.name}</div>
+                      <div class="text-[10px] text-slate-400 font-normal line-clamp-1">${sym.desc}</div>
+                    </div>
+                    <div class="w-5 h-5 rounded-md flex items-center justify-center transition-colors ${
+                      isSelected ? 'bg-sky-600 text-white' : 'border border-slate-300 bg-white'
+                    }">
+                      ${isSelected ? '<i data-lucide="check" class="w-3.5 h-3.5 stroke-[3]"></i>' : ''}
+                    </div>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderCspSection() {
+      // Variables
+      const vList = document.getElementById('csp-vars-list');
+      if (vList) {
+        vList.innerHTML = SYMPTOMS_DATA.map((s, idx) => {
+          const isAct = selectedSymptoms.has(s.id);
+          return `
+            <div class="flex justify-between p-1.5 rounded-lg border ${isAct ? 'bg-purple-50/70 border-purple-200 font-bold' : 'bg-slate-50 border-slate-200 text-slate-500'}">
+              <span>V${idx + 1} (${s.name})</span>
+              <span class="${isAct ? 'text-purple-700' : 'text-slate-400'}">${isAct ? '= Yes (1)' : '= No (0)'}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const vSum = document.getElementById('csp-vars-summary');
+      if (vSum) {
+        vSum.innerHTML = `Active: <strong class="text-purple-700">${selectedSymptoms.size}</strong> | Absent: <strong class="text-slate-600">${SYMPTOMS_DATA.length - selectedSymptoms.size}</strong>`;
+      }
+
+      // Constraints
+      const rList = document.getElementById('csp-rules-list');
+      if (rList) {
+        rList.innerHTML = CSP_CONSTRAINTS.map(c => {
+          const satisfied = c.evaluate(selectedSymptoms);
+          return `
+            <div class="p-3 rounded-xl border text-xs transition-all ${
+              satisfied ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 font-semibold' : 'bg-slate-50/60 border-slate-200 text-slate-500'
+            }">
+              <div class="flex items-center justify-between mb-1">
+                <span>${c.id}: ${c.target}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                  satisfied ? 'bg-emerald-200 text-emerald-800' : 'bg-slate-200 text-slate-600'
+                }">${satisfied ? 'Satisfied' : 'Violated'}</span>
+              </div>
+              <div class="font-mono text-[11px] opacity-80">${c.condition}</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const satCount = CSP_CONSTRAINTS.filter(c => c.evaluate(selectedSymptoms)).length;
+      const cSum = document.getElementById('csp-constraints-summary');
+      if (cSum) {
+        cSum.innerHTML = `
+          <span>Satisfied: <strong class="text-emerald-600">${satCount}</strong></span>
+          <span>Violated: <strong class="text-rose-500">${CSP_CONSTRAINTS.length - satCount}</strong></span>
+        `;
+      }
+    }
+
+    function renderForwardChainingSection() {
+      // Working memory
+      const badge = document.getElementById('fc-facts-count-badge');
+      if (badge) badge.textContent = `${selectedSymptoms.size} Facts`;
+
+      const fInitial = document.getElementById('fc-facts-initial');
+      if (fInitial) {
+        if (selectedSymptoms.size > 0) {
+          fInitial.innerHTML = Array.from(selectedSymptoms).map(id => {
+            const sym = SYMPTOMS_DATA.find(s => s.id === id);
+            return `
+              <div class="p-2 rounded-xl bg-blue-50/70 border border-blue-200 text-xs flex items-center justify-between">
+                <span class="font-semibold text-blue-900">${sym ? sym.name : id}</span>
+                <span class="text-[10px] font-mono bg-blue-200 text-blue-800 px-1.5 py-0.5 rounded font-bold">TRUE</span>
+              </div>
+            `;
+          }).join('');
+        } else {
+          fInitial.innerHTML = `<span class="text-xs text-slate-400 italic">No symptoms in working memory.</span>`;
+        }
+      }
+
+      const fDerived = document.getElementById('fc-facts-derived');
+      if (fDerived) {
+        if (fcDerivedFacts.length > 0) {
+          fDerived.innerHTML = fcDerivedFacts.map(d => `
+            <span class="px-2.5 py-1 rounded-lg bg-teal-100 text-teal-800 font-bold text-xs border border-teal-300">
+              ${d}
+            </span>
+          `).join('');
+        } else {
+          fDerived.innerHTML = `<span class="text-xs text-slate-400 italic">None yet</span>`;
+        }
+      }
+
+      // Rules Scan Stepper
+      const rContainer = document.getElementById('fc-rules-list');
+      if (rContainer) {
+        rContainer.innerHTML = RULES_DATA.map((rule, idx) => {
+          const isEvaluated = idx < fcStep;
+          const isCurrent = idx === fcStep;
+          const isFired = rule.premises.every(p => selectedSymptoms.has(p));
+
+          let cardStyle = 'bg-slate-50/50 border-slate-200 opacity-60';
+          let badgeHtml = `<span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-200 text-slate-600 uppercase">${isCurrent ? 'Current in Queue' : 'Pending'}</span>`;
+
+          if (isEvaluated) {
+            if (isFired) {
+              cardStyle = 'bg-teal-50 border-teal-300 shadow-xs';
+              badgeHtml = `<span class="text-[10px] font-bold px-2.5 py-0.5 rounded bg-teal-600 text-white uppercase flex items-center gap-1 shadow-xs"><i data-lucide="check" class="w-3 h-3 stroke-[3]"></i> Fired</span>`;
+            } else {
+              cardStyle = 'bg-rose-50/40 border-rose-200';
+              badgeHtml = `<span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-200 text-slate-600 uppercase flex items-center gap-1"><i data-lucide="x" class="w-3 h-3"></i> Skipped</span>`;
+            }
+          } else if (isCurrent) {
+            cardStyle = 'bg-amber-50/60 border-amber-300 ring-2 ring-amber-400/20';
+          }
+
+          const premiseHtml = rule.premises.map(p => {
+            const hasP = selectedSymptoms.has(p);
+            return `<span class="px-1.5 py-0.5 rounded ${hasP ? 'bg-emerald-100 text-emerald-800 font-bold' : 'bg-rose-100 text-rose-800'}">${p} (${hasP ? 'Yes' : 'No'})</span>`;
+          }).join(' ∧ ');
+
+          return `
+            <div class="p-4 rounded-xl border transition-all ${cardStyle}">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-white border border-slate-200">${rule.code}</span>
+                  <span class="text-xs font-bold text-slate-800">${rule.description}</span>
+                </div>
+                <div>${badgeHtml}</div>
+              </div>
+              <div class="text-xs space-y-1 mb-2 font-mono">
+                <div class="text-slate-600"><strong>IF:</strong> ${premiseHtml}</div>
+                <div class="text-slate-700"><strong>THEN:</strong> <span class="font-semibold text-teal-800">${rule.conclusion}</span></div>
+              </div>
+              <p class="text-[11px] text-slate-400 italic">${rule.clinicalRationale}</p>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function renderDashboardSection() {
+      const triggered = RULES_DATA.filter(r => r.premises.every(p => selectedSymptoms.has(p)));
+      const untriggered = RULES_DATA.length - triggered.length;
+      const uniqueDiseases = [...new Set(triggered.map(t => t.conclusion))];
+
+      document.getElementById('dash-symptoms-count').innerText = selectedSymptoms.size;
+      document.getElementById('dash-rules-triggered').innerText = triggered.length;
+      document.getElementById('dash-rules-untriggered').innerText = untriggered;
+      document.getElementById('dash-candidates-count').innerText = uniqueDiseases.length;
+
+      const cList = document.getElementById('dash-candidates-list');
+      if (cList) {
+        if (uniqueDiseases.length > 0) {
+          cList.innerHTML = uniqueDiseases.map(d => `
+            <div class="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center justify-between text-xs font-bold text-emerald-900">
+              <span>${d}</span>
+              <span class="px-2 py-0.5 bg-emerald-200 text-emerald-800 rounded-full text-[10px]">Logical Deduction Match</span>
+            </div>
+          `).join('');
+        } else {
+          cList.innerHTML = `<div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-400 italic">No candidate disease triggered by active symptom inputs.</div>`;
+        }
+      }
+
+      const traceBox = document.getElementById('dash-trace-content');
+      if (traceBox) {
+        if (triggered.length > 0) {
+          traceBox.innerHTML = `
+            <div>&bull; Asserted Symptoms into Working Memory: [ ${Array.from(selectedSymptoms).join(', ')} ]</div>
+            ${triggered.map(r => `<div>&bull; Rule <strong>${r.code}</strong> satisfied: (<em>${r.premises.join(' ∧ ')}</em>) &rarr; Concluded: <strong>${r.conclusion}</strong></div>`).join('')}
+            <div class="text-emerald-700 font-bold mt-2">&bull; Final Derived Consensus: ${uniqueDiseases.join(' | ')}</div>
+          `;
+        } else {
+          traceBox.innerHTML = `<div>&bull; No rules satisfied with current symptom assignments. Try combinations like Fever + Cough or Nausea + Vomiting.</div>`;
+        }
+      }
+    }
+
+    function renderRuleExplorerSection() {
+      const cont = document.getElementById('rules-cards-container');
+      if (!cont) return;
+
+      cont.innerHTML = RULES_DATA.map(rule => {
+        const isFired = rule.premises.every(p => selectedSymptoms.has(p));
+        const isInspected = inspectedRuleId === rule.id;
+
+        return `
+          <div onclick="inspectRule(${rule.id})"
+            class="p-5 rounded-2xl border cursor-pointer transition-all ${
+              isInspected
+                ? 'border-sky-500 ring-2 ring-sky-500/20 shadow-md bg-white'
+                : 'border-sky-100 hover:border-slate-300 bg-white shadow-xs'
+            }">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-mono font-bold text-xs">${rule.code}</span>
+                <h4 class="text-sm font-bold text-slate-900">${rule.description}</h4>
+              </div>
+              <span class="text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
+                isFired ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-100 text-slate-600 border border-slate-200'
+              }">
+                <i data-lucide="${isFired ? 'check-circle-2' : 'x-circle'}" class="w-3.5 h-3.5 ${isFired ? 'text-emerald-600' : 'text-slate-400'}"></i>
+                ${isFired ? 'Triggered' : 'Not Triggered'}
+              </span>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1.5 text-xs font-mono mb-3">
+              <div>
+                <strong class="text-sky-700">IF:</strong>
+                ${rule.premises.map(p => `<span class="${selectedSymptoms.has(p) ? 'text-emerald-700 font-bold underline' : 'text-slate-600'}">${p}</span>`).join(' AND ')}
+              </div>
+              <div><strong class="text-teal-700">THEN:</strong> ${rule.conclusion}</div>
+            </div>
+
+            <p class="text-xs text-slate-500">${rule.clinicalRationale}</p>
+          </div>
+        `;
+      }).join('');
+
+      renderRuleInspectorSidePanel();
+    }
+
+    function inspectRule(ruleId) {
+      inspectedRuleId = ruleId;
+      renderRuleExplorerSection();
+    }
+
+    function renderRuleInspectorSidePanel() {
+      const panel = document.getElementById('rule-inspector-card');
+      if (!panel) return;
+
+      const rule = RULES_DATA.find(r => r.id === inspectedRuleId);
+      if (!rule) return;
+
+      const isFired = rule.premises.every(p => selectedSymptoms.has(p));
+
+      panel.innerHTML = `
+        <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Rule Inspector</span>
+            <h3 class="text-base font-black text-slate-900">${rule.code} Evaluation Details</h3>
+          </div>
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full ${
+            isFired ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
+          }">
+            ${isFired ? 'Currently Triggered' : 'Not Triggered'}
+          </span>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-bold uppercase text-slate-400 mb-2">Premise Conditions Check:</h4>
+          <div class="space-y-2">
+            ${rule.premises.map(p => {
+              const hasP = selectedSymptoms.has(p);
+              const sym = SYMPTOMS_DATA.find(s => s.id === p);
+              return `
+                <div class="p-2.5 rounded-xl border flex items-center justify-between text-xs ${
+                  hasP ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-500'
+                }">
+                  <span class="font-semibold">${sym ? sym.name : p}</span>
+                  <span class="font-mono text-[10px] font-bold">
+                    ${hasP ? 'TRUE (Present in Memory)' : 'FALSE (Absent)'}
+                  </span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-sky-50/60 border border-sky-200">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-sky-700 block mb-1">Deduced Clinical Class:</span>
+          <h4 class="text-sm font-bold text-sky-950">${rule.conclusion}</h4>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-bold uppercase text-slate-400 mb-1">Pedagogical Clinical Rationale:</h4>
+          <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200">
+            ${rule.clinicalRationale}
+          </p>
+        </div>
+
+        <button onclick="loadScenario(['${rule.premises.join("', '")}'], '${rule.code}')" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs transition-all shadow-xs flex items-center justify-center gap-2">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span>Load Symptoms to Fire This Rule</span>
+        </button>
+      `;
+    }
+
+    function renderTestCasesSection() {
+      const tbody = document.getElementById('test-cases-table-body');
+      if (!tbody) return;
+
+      let passedCount = 0;
+      let failedCount = 0;
+
+      tbody.innerHTML = TEST_CASES_DATA.map(tc => {
+        const res = testResults[tc.id];
+        if (res) {
+          if (res.passed) passedCount++; else failedCount++;
+        }
+
+        const isLoaded = JSON.stringify(Array.from(selectedSymptoms).sort()) === JSON.stringify(tc.symptoms.slice().sort());
+
+        return `
+          <tr class="hover:bg-sky-50/40 transition-colors">
+            <td class="px-6 py-4 font-mono font-bold text-slate-800">${tc.id}</td>
+            <td class="px-6 py-4">
+              <div class="flex flex-wrap gap-1">
+                ${tc.symptoms.map(s => `<span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-mono text-[11px] border border-blue-200">${s}</span>`).join('')}
+              </div>
+            </td>
+            <td class="px-6 py-4 font-semibold text-slate-700">${tc.expected}</td>
+            <td class="px-6 py-4 font-mono font-bold text-slate-800">
+              ${res ? res.actual : '<span class="text-slate-400 italic">Not evaluated</span>'}
+            </td>
+            <td class="px-6 py-4">
+              ${
+                res
+                  ? res.passed
+                    ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"><i data-lucide="check" class="w-3 h-3 stroke-[3]"></i> Passed</span>'
+                    : '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300"><i data-lucide="x" class="w-3 h-3 stroke-[3]"></i> Failed</span>'
+                  : '<span class="text-slate-400 text-[11px] italic">Ready to run</span>'
+              }
+            </td>
+            <td class="px-6 py-4 text-right space-x-2">
+              <button onclick="runSingleTest('${tc.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition-all">
+                Run
+              </button>
+              <button onclick="loadScenario(['${tc.symptoms.join("', '")}'], '${tc.id}')" class="px-2.5 py-1.5 rounded-lg font-semibold text-[11px] transition-all ${
+                isLoaded ? 'bg-sky-600 text-white' : 'bg-sky-50 hover:bg-sky-100 text-sky-700'
+              }">
+                ${isLoaded ? 'Loaded' : 'Load Inputs'}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const pEl = document.getElementById('tests-passed-count');
+      const fEl = document.getElementById('tests-failed-count');
+      if (pEl) pEl.innerText = passedCount;
+      if (fEl) fEl.innerText = failedCount;
+    }
+
+    // ------------------------------------------------------------------------
+    // MASTER RENDER DISPATCHER
+    // ------------------------------------------------------------------------
+    function renderAll() {
+      renderBadges();
+      renderChips();
+      renderLivePredictionCard();
+      renderSymptomCategories();
+      renderCspSection();
+      renderForwardChainingSection();
+      renderDashboardSection();
+      renderRuleExplorerSection();
+      renderTestCasesSection();
+
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // INIT ON LOAD
+    // ------------------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      // Evaluate test cases once for immediate verification
+      TEST_CASES_DATA.forEach(tc => {
+        const actual = evaluateSymptomSet(new Set(tc.symptoms));
+        const passed = (actual === tc.expected);
+        testResults[tc.id] = { actual, passed };
+      });
+
+      renderAll();
+      navigate('home');
+    });
+  </script>
+</body>
+</html>
